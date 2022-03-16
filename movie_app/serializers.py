@@ -1,21 +1,17 @@
 from rest_framework import serializers
-from movie_app.models import Director
-from movie_app.models import Movie
-from movie_app.models import Review
+from movie_app.models import Director, Movie, Review
 
 
 class ReviewSerializer(serializers.ModelSerializer):
     class Meta:
         model = Review
-        fields = '__all__'
+        fields = 'id text stars'.split()
 
 
 class DirectorSerializer(serializers.ModelSerializer):
-    movie = serializers.SerializerMethodField()
-
     class Meta:
         model = Director
-        fields = 'id name movie'.split()
+        fields = 'id name movies_count'.split()
 
 
 class MovieSerializer(serializers.ModelSerializer):
@@ -26,7 +22,7 @@ class MovieSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Movie
-        fields = '__all__'
+        fields = 'id title director reviews reviews_count average_rating'.split()
 
     def get_reviews(self, movie):
         # filtered_reviews = Review.objects.filter(movie=movie, stars__gte=4)
@@ -35,3 +31,9 @@ class MovieSerializer(serializers.ModelSerializer):
 
     def get_reviews_count(self, movie):
         return movie.reviews.filter(stars__gte=4).count()
+
+
+class MoviesReviews(serializers.ModelSerializer):
+    class Meta:
+        model = Movie
+        fields = 'id title average_rating'.split()
