@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from movie_app.models import Director, Movie, Review
+from rest_framework.exceptions import ValidationError
 
 
 class ReviewSerializer(serializers.ModelSerializer):
@@ -37,3 +38,33 @@ class MoviesReviews(serializers.ModelSerializer):
     class Meta:
         model = Movie
         fields = 'id title average_rating'.split()
+
+
+class DirectorValidateSerializer(serializers.Serializer):
+    name = serializers.CharField(min_length=2, max_length=30)
+
+
+class MovieValidateSerializer(serializers.Serializer):
+    title = serializers.CharField(min_length=2, max_length=16)
+    description = serializers.CharField(min_length=2, max_length=77)
+    duration = serializers.IntegerField()
+    director_id = serializers.IntegerField()
+
+    # def validate_director_id(self, director_id):
+    #     try:
+    #         Director.objects.get(id=director_id)
+    #     except Director.DoesNotExist:
+    #         raise ValidationError('Director does not exist')
+
+    def validate(self, attrs):
+        try:
+            Director.objects.get(id=attrs['director_id'])
+        except Director.DoesNotExist:
+            raise ValidationError(f'Director with id {attrs["director_id"]} does not exist')
+        return attrs
+
+
+class ReviewValidateSerializer(serializers.Serializer):
+    text = serializers.CharField(min_length=2, max_length=300)
+    movie_id = serializers.IntegerField()
+    stars = serializers.IntegerField()
